@@ -24,6 +24,9 @@ export default function DrawYourWeekendImagination() {
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
     ctxRef.current = ctx;
+
+    // Save blank initial state
+    saveState();
   };
 
   useEffect(() => {
@@ -71,6 +74,47 @@ export default function DrawYourWeekendImagination() {
   };
 
   const endDrawing = () => setIsDrawing(false);
+
+  // -----------------------------
+  // ⭐ TOUCH SUPPORT FOR MOBILE
+  // -----------------------------
+  const getTouchPos = (touchEvent) => {
+    const rect = canvasRef.current.getBoundingClientRect();
+    const touch = touchEvent.touches[0];
+    return {
+      offsetX: touch.clientX - rect.left,
+      offsetY: touch.clientY - rect.top,
+    };
+  };
+
+  const touchStart = (e) => {
+    e.preventDefault();
+    if (mode === "sticker") return;
+
+    const { offsetX, offsetY } = getTouchPos(e);
+    ctxRef.current.beginPath();
+    ctxRef.current.moveTo(offsetX, offsetY);
+    setIsDrawing(true);
+    saveState();
+  };
+
+  const touchMove = (e) => {
+    e.preventDefault();
+
+    if (!isDrawing || mode === "sticker") return;
+    const { offsetX, offsetY } = getTouchPos(e);
+
+    const ctx = ctxRef.current;
+    ctx.lineWidth = brushSize;
+    ctx.strokeStyle = brushColor;
+
+    ctx.lineTo(offsetX, offsetY);
+    ctx.stroke();
+  };
+
+  const touchEnd = () => setIsDrawing(false);
+
+  // -----------------------------
 
   const saveState = () => {
     const data = canvasRef.current.toDataURL();
@@ -181,9 +225,17 @@ export default function DrawYourWeekendImagination() {
       <canvas
         ref={canvasRef}
         className="canvas"
+
+        // Desktop
         onMouseDown={startDrawing}
         onMouseMove={draw}
         onMouseUp={endDrawing}
+
+        // Mobile Touch
+        onTouchStart={touchStart}
+        onTouchMove={touchMove}
+        onTouchEnd={touchEnd}
+
         onClick={placeSticker}
       />
 
