@@ -1,9 +1,9 @@
 import React, { useRef, useEffect, useState } from "react";
 
-export default function MobileCanvasTest() {
+export default function MobileCanvasPointerTest() {
   const canvasRef = useRef(null);
   const ctxRef = useRef(null);
-  const [isDrawing, setIsDrawing] = useState(false);
+  const [drawing, setDrawing] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -20,52 +20,41 @@ export default function MobileCanvasTest() {
 
   const getPos = (e) => {
     const rect = canvasRef.current.getBoundingClientRect();
-
-    if (e.touches) {
-      return {
-        x: e.touches[0].clientX - rect.left,
-        y: e.touches[0].clientY - rect.top
-      };
-    }
-
     return {
-      x: e.nativeEvent.offsetX,
-      y: e.nativeEvent.offsetY
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
     };
   };
 
-  const start = (e) => {
+  const handlePointerDown = (e) => {
     e.preventDefault();
     const pos = getPos(e);
     ctxRef.current.beginPath();
     ctxRef.current.moveTo(pos.x, pos.y);
-    setIsDrawing(true);
+    setDrawing(true);
   };
 
-  const move = (e) => {
-    e.preventDefault();
-    if (!isDrawing) return;
+  const handlePointerMove = (e) => {
+    if (!drawing) return;
     const pos = getPos(e);
     ctxRef.current.lineTo(pos.x, pos.y);
     ctxRef.current.stroke();
   };
 
-  const end = () => setIsDrawing(false);
+  const handlePointerUp = () => setDrawing(false);
 
   return (
-    <>
-      <h2>Mobile Canvas Test</h2>
+    <div>
+      <h2>Pointer Event Test</h2>
 
       <canvas
         ref={canvasRef}
         style={{ border: "1px solid black", touchAction: "none" }}
-        onMouseDown={start}
-        onMouseMove={move}
-        onMouseUp={end}
-        onTouchStart={start}
-        onTouchMove={move}
-        onTouchEnd={end}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
       />
-    </>
+    </div>
   );
 }
