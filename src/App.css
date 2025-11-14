@@ -1,5 +1,5 @@
 .canvas {
-  touch-action: none; /* needed to allow finger drawing */
+  touch-action: none !important; /* needed to allow finger drawing */
   border: 1px solid #ccc;
   margin-top: 10px;
   width: 100%;
